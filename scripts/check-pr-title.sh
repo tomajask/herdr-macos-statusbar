@@ -7,3 +7,4 @@ if [[ ! "$1" =~ $pattern ]]; then
   echo "PR title must follow https://www.conventionalcommits.org/, e.g. 'fix(net): …'. Got: $1" >&2
   exit 1
 fi
+echo "ok: $1"
