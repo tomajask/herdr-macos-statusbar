@@ -3,7 +3,7 @@
 A [herdr](https://herdr.dev) plugin that puts an iTerm2-style status bar in the tab bar on macOS:
 
 ```
-󰁾 54% 1:45 ⚡    13% ▃▅▇██▅▄▂   󰍛 19 GB ▇▇▇▇▇▇▇▇   ↓121 kB/s ↑76 kB/s ▁▁▃▇▂▁▁▁
+󰁾 54% 1:45 ⚡   󰻠 13% ▃▅▇██▅▄▂   󰍛 19 GB ▇▇▇▇▇▇▇▇   ↓121 kB/s ↑76 kB/s ▁▁▃▇▂▁▁▁
 ```
 
 | Segment | Shows | Refresh |
@@ -68,7 +68,7 @@ shellcheck bin/*.sh
 herdr plugin link .
 ```
 
-The tests feed raw output from the macOS tools, captured on a real Mac, into each segment, and feed sample `config.toml` files into the config editor.
+The tests feed raw output from the macOS tools into each segment (see `test/fixtures/README.md` for which samples are real captures), and feed sample `config.toml` files into the config editor.
 
 ## License
 

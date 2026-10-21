@@ -39,8 +39,10 @@ sparkline() {
 # stdin: `top -l 2 -n 0 -s 1`. The first sample covers time since boot, so use the last.
 render_cpu() {
   local busy
-  busy=$(awk '/^CPU usage/ { idle = $7 } END { sub("%", "", idle); printf "%.0f", 100 - idle }')
-  echo " ${busy}% $(push_history cpu "$busy" | sparkline 100)"
+  busy=$(awk '
+    /^CPU usage/ { idle = $7 }
+    END { if (idle == "") exit 1; sub("%", "", idle); printf "%.0f", 100 - idle }') || return 1
+  echo "󰻠 ${busy}% $(push_history cpu "$busy" | sparkline 100)"
 }
 
 # stdin: `vm_stat`. $1: total RAM in bytes (`sysctl -n hw.memsize`).

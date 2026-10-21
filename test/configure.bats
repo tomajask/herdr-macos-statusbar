@@ -93,3 +93,9 @@ EOF
   run config_remove <<< 'onboarding = false'
   [ "$output" = 'onboarding = false' ]
 }
+
+@test "add: a refusal prints the entries to paste by hand" {
+  run config_add "$SCRIPT" <<< 'ui.tab_bar_right = []'
+  [ "$status" -eq 3 ]
+  [[ "$output" == *"$(entries | sed -n 2p)"* ]]
+}

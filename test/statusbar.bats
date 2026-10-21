@@ -46,14 +46,14 @@ setup() {
 @test "cpu: busy percent comes from the second top sample" {
   run render_cpu < "$FIXTURES/top.txt"
   [ "$status" -eq 0 ]
-  [ "$output" = " 13% ▂" ]
+  [ "$output" = "󰻠 13% ▂" ]
 }
 
 @test "cpu: the sparkline shows the last 8 samples, oldest first" {
   mkdir -p "$MSB_STATE_DIR"
   printf '%s\n' 100 0 25 50 75 100 90 60 40 > "$MSB_STATE_DIR/cpu.history"
   run render_cpu < "$FIXTURES/top.txt"
-  [ "$output" = " 13% ▃▅▇██▅▄▂" ]
+  [ "$output" = "󰻠 13% ▃▅▇██▅▄▂" ]
 }
 
 # 24 GiB Mac. Used = app (anonymous - purgeable) + wired + compressed, like Activity Monitor:
@@ -82,4 +82,11 @@ setup() {
   printf '%s\n' 0 20480 10240 > "$MSB_STATE_DIR/net.history"
   run render_net < "$FIXTURES/netstat-en0.txt"
   [ "$output" = "↓7 kB/s ↑4 kB/s ▁█▅▃" ]
+}
+
+@test "cpu: no top output hides the segment and keeps the history clean" {
+  run render_cpu < /dev/null
+  [ "$status" -ne 0 ]
+  [ "$output" = "" ]
+  [ ! -s "$MSB_STATE_DIR/cpu.history" ]
 }

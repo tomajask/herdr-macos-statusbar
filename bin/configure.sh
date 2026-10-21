@@ -57,6 +57,7 @@ config_add() {
     END {
       if (refuse != "") {
         print "Unsupported config.toml layout: " refuse ". No changes made." > "/dev/stderr"
+        print "Add these entries to ui.tab_bar_right by hand:\n" entries > "/dev/stderr"
         exit 3
       }
       if (NR == 1 && line[1] == "") NR = 0
@@ -77,8 +78,8 @@ config_add() {
 
 # stdin: config.toml, stdout: config.toml without the lines config_add put in.
 config_remove() {
-  grep -v -F "$MARKER"
-  return 0
+  # grep exits 1 when every line was ours; only 2 is an error.
+  grep -v -F "$MARKER" || [ $? -eq 1 ]
 }
 
 config_path() {
@@ -104,12 +105,14 @@ reload_config() {
   local result
   result=$("${HERDR_BIN_PATH:-herdr}" server reload-config 2>&1)
   case "$result" in
-    *'"diagnostics":[]'*'"status":"applied"'*) return 0 ;;
-    *)
-      echo "herdr did not accept the new config: $result" >&2
-      return 1
+    *'"status":"applied"'*)
+      case "$result" in
+        *'"diagnostics":[]'*) return 0 ;;
+      esac
       ;;
   esac
+  echo "herdr did not accept the new config: $result" >&2
+  return 1
 }
 
 # Runs an edit function over config.toml with a backup, then reloads herdr and
