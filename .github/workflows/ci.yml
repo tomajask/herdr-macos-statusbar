@@ -26,10 +26,12 @@ jobs:
 
       - name: Markdown has no Nerd Font glyphs
         # GitHub renders Markdown in a browser font, where these glyphs show as empty boxes.
-        # `$? = 1` keeps perl's own failure (e.g. invalid UTF-8) instead of overriding it.
+        # Lines are decoded strictly, so any invalid UTF-8 fails the step;
+        # `$? = 1` sets the exit status without hiding that failure.
         run: |
-          git ls-files -z '*.md' | xargs -0 perl -CSD -ne '
-            if (/[\x{E000}-\x{F8FF}\x{F0000}-\x{FFFFF}]/) { print "$ARGV:$.: Nerd Font glyph\n"; $bad = 1 }
+          git ls-files -z '*.md' | xargs -0 perl -MEncode -ne '
+            my $text = Encode::decode("UTF-8", $_, Encode::FB_CROAK);
+            if ($text =~ /[\x{E000}-\x{F8FF}\x{F0000}-\x{FFFFF}]/) { print "$ARGV:$.: Nerd Font glyph\n"; $bad = 1 }
             close ARGV if eof;
             END { $? = 1 if $bad }'
 
