@@ -1,0 +1,21 @@
+id = "tomajask.macos-statusbar"
+name = "macOS Status Bar"
+version = "0.1.0"
+min_herdr_version = "0.9.5"
+description = "Battery, CPU, memory and network throughput with sparklines in the tab bar"
+platforms = ["macos"]
+
+[[startup]]
+command = ["/bin/bash", "bin/configure.sh", "startup"]
+
+[[actions]]
+id = "configure"
+title = "Status bar: add segments to config.toml"
+contexts = ["global"]
+command = ["/bin/bash", "bin/configure.sh", "configure"]
+
+[[actions]]
+id = "unconfigure"
+title = "Status bar: remove segments from config.toml"
+contexts = ["global"]
+command = ["/bin/bash", "bin/configure.sh", "unconfigure"]
