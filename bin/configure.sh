@@ -133,10 +133,10 @@ edit_config() {
   backup_dir="$HERDR_PLUGIN_STATE_DIR/backups"
   mkdir -p "$backup_dir" "$(dirname "$config")"
   if [ -f "$config" ]; then
-    backup="$backup_dir/config-$(date +%Y%m%d-%H%M%S).toml"
+    backup="$backup_dir/config-$(date +%Y%m%d-%H%M%S)-$$.toml"
     /bin/cp -f "$config" "$backup"
   else
-    backup="$backup_dir/config-$(date +%Y%m%d-%H%M%S).absent"
+    backup="$backup_dir/config-$(date +%Y%m%d-%H%M%S)-$$.absent"
     : > "$backup"
   fi
 
