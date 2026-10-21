@@ -2,8 +2,6 @@ name: CI
 
 on:
   pull_request:
-    # `edited` re-runs the title check when only the PR title changes.
-    types: [opened, synchronize, reopened, edited]
   push:
     branches: [main]
 
@@ -24,27 +22,16 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 10
     steps:
-      - name: PR title is a Conventional Commit
-        # Squash merges use the PR title as the commit on main.
-        if: github.event_name == 'pull_request'
-        env:
-          TITLE: ${{ github.event.pull_request.title }}
-        run: |
-          pattern='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9-]+\))?!?: .+'
-          if [[ ! "$TITLE" =~ $pattern ]]; then
-            echo "PR title must follow https://www.conventionalcommits.org/, e.g. 'fix(net): …'. Got: $TITLE" >&2
-            exit 1
-          fi
-
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Markdown has no Nerd Font glyphs
         # GitHub renders Markdown in a browser font, where these glyphs show as empty boxes.
+        # `$? = 1` keeps perl's own failure (e.g. invalid UTF-8) instead of overriding it.
         run: |
-          git ls-files '*.md' | xargs perl -CSD -ne '
+          git ls-files -z '*.md' | xargs -0 perl -CSD -ne '
             if (/[\x{E000}-\x{F8FF}\x{F0000}-\x{FFFFF}]/) { print "$ARGV:$.: Nerd Font glyph\n"; $bad = 1 }
             close ARGV if eof;
-            END { exit $bad }'
+            END { $? = 1 if $bad }'
 
       - name: Install bats and shellcheck
         run: brew install bats-core shellcheck

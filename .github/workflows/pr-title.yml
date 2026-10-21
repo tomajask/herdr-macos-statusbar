@@ -1,0 +1,26 @@
+name: PR title
+
+# Squash merges use the PR title as the commit on main, so it must be a Conventional Commit.
+# Separate from CI so that editing a title re-runs only this quick check.
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions: {}
+
+jobs:
+  # `pr-title` is a required status check on main; renaming it means updating branch protection.
+  pr-title:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: PR title is a Conventional Commit
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          pattern='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9-]+\))?!?: [^[:space:]].*'
+          if [[ ! "$TITLE" =~ $pattern ]]; then
+            echo "PR title must follow https://www.conventionalcommits.org/, e.g. 'fix(net): …'. Got: $TITLE" >&2
+            exit 1
+          fi
+          echo "ok: $TITLE"
