@@ -2,11 +2,13 @@
 
 A [herdr](https://herdr.dev) plugin that puts an iTerm2-style status bar in the tab bar on macOS:
 
-```
-BAT 54% 1:45 ⚡ │ CPU 13% │ MEM 19G │ ↓121k ↑76k
-```
+![Status bar in Ghostty: battery 66% 1:22 charging, CPU 13%, memory 20G, network ↓3k ↑2k](docs/statusbar.png)
 
-By default, the terminal shows Nerd Font icons where this preview has `BAT`, `CPU` and `MEM`. They aren't shown here because browsers have no Nerd Font. If you prefer the words, use `--text`.
+The icons are Nerd Font glyphs. With `--text` they become words:
+
+```
+BAT 66% 1:22 ⚡ │ CPU 13% │ MEM 20G │ ↓3k ↑2k
+```
 
 | Segment | Shows | Refresh |
 |---|---|---|
