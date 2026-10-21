@@ -1,6 +1,6 @@
 # How herdr runs this plugin
 
-Facts read from the herdr v0.9.5 source (github.com/ogulcancelik/herdr). Paths are relative to that repo, and `plugins.mdx` and `marketplace.mdx` are in `docs/next/website/src/content/docs/`. CI runs `scripts/check-herdr-citations.sh` against a clone of the tag, which proves each cited file and line range exists. Whether a range says what the bullet claims still needs a reader, so open the lines when you add or change a citation.
+Facts read from the herdr v0.9.5 source (github.com/ogulcancelik/herdr). Paths are relative to that repo, and `plugins.mdx` and `marketplace.mdx` are in `docs/next/website/src/content/docs/`. `scripts/check-herdr-citations.sh` fetches the herdr commit it pins and proves each cited file and line range exists. Set `HERDR_CHECKOUT` to reuse a local clone. It can't tell whether a range says what the bullet claims, so read the lines when you add or change a citation.
 
 ## Status entries (`ui.tab_bar_right`)
 
