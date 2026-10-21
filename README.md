@@ -4,10 +4,10 @@ A [herdr](https://herdr.dev) plugin that puts an iTerm2-style status bar in the 
 
 ![Status bar in Ghostty: battery 66% 1:22 charging, CPU 13%, memory 20G, network ↓3k ↑2k](docs/statusbar.png)
 
-The icons are Nerd Font glyphs. With `--text` they become words:
+The icons are Nerd Font glyphs. Ghostty ships them built in; other terminals need a Nerd Font. With `--text` they become words:
 
 ```
-BAT 66% 1:22 ⚡ │ CPU 13% │ MEM 20G │ ↓3k ↑2k
+BAT 66% 1:22 ⚡ │ CPU 13% │ MEM 20G │ NET ↓3k ↑2k
 ```
 
 | Segment | Shows | Refresh |
@@ -31,10 +31,10 @@ Each segment is a separate entry in `config.toml`. To change how one looks, add 
 ```
 
 ```
-BAT 54% 1:45 ⚡ │ CPU 13% ▁▁▃▃ │ MEM 19G ▇▇▇▇ │ NET ↓121k ↑76k ▁▂▁▁
+BAT 66% 1:22 ⚡ │ CPU 13% ▁▁▃▃ │ MEM 20G ▇▇▇▇ │ NET ↓3k ↑2k ▁▂▁▁
 ```
 
-It uses only tools that ship with macOS (`pmset`, `top`, `vm_stat`, `netstat`, `route`) and the system `/bin/bash`, so there is nothing else to install. Icons are Nerd Font glyphs; Ghostty ships them built in, other terminals need a Nerd Font.
+It uses only tools that ship with macOS (`pmset`, `top`, `vm_stat`, `netstat`, `route`) and the system `/bin/bash`, so there is nothing else to install.
 
 ## Install
 
