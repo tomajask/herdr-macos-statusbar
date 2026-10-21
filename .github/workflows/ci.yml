@@ -23,6 +23,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Markdown has no Nerd Font glyphs
         run: scripts/check-markdown-glyphs.sh
@@ -74,9 +76,9 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Clone herdr at the version docs/herdr.md describes
-        run: git clone --quiet --depth 1 --branch v0.9.5 https://github.com/ogulcancelik/herdr.git "$RUNNER_TEMP/herdr"
+        with:
+          persist-credentials: false
 
       - name: Citations in docs/herdr.md point at existing lines
-        run: scripts/check-herdr-citations.sh "$RUNNER_TEMP/herdr"
+        # The script fetches the herdr commit it pins.
+        run: scripts/check-herdr-citations.sh
