@@ -110,3 +110,17 @@ setup() {
   [ "$output" = "" ]
   [ ! -s "$MSB_STATE_DIR/cpu.history" ]
 }
+
+# A Nerd Font glyph is easy to lose when an editor or tool rewrites the file.
+starts_with_icon() {
+  perl -CSD -ne 'exit(/^[\x{E000}-\x{F8FF}\x{F0000}-\x{FFFFF}] \S/ ? 0 : 1)' <<< "$1"
+}
+
+@test "icons: battery, cpu and mem start with a Nerd Font icon" {
+  run render_batt < "$FIXTURES/pmset-charging.txt"
+  starts_with_icon "$output"
+  run render_cpu < "$FIXTURES/top.txt"
+  starts_with_icon "$output"
+  run render_mem 25769803776 < "$FIXTURES/vm_stat.txt"
+  starts_with_icon "$output"
+}
