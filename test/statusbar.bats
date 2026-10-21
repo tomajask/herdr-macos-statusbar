@@ -113,7 +113,9 @@ setup() {
 
 # A Nerd Font glyph is easy to lose when an editor or tool rewrites the file.
 starts_with_icon() {
-  perl -CSD -ne 'exit(/^[\x{E000}-\x{F8FF}\x{F0000}-\x{FFFFF}] \S/ ? 0 : 1)' <<< "$1"
+  # shellcheck source=../scripts/glyphs.sh
+  source "$BATS_TEST_DIRNAME/../scripts/glyphs.sh"
+  perl -CSD -ne 'BEGIN { $glyph = qr/$ENV{NERD_FONT_GLYPH}/ } exit(/^$glyph \S/ ? 0 : 1)' <<< "$1"
 }
 
 @test "icons: batt starts with a Nerd Font icon" {
