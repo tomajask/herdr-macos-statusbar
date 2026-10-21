@@ -70,7 +70,7 @@ jobs:
           print(f"{manifest['id']} {manifest['version']}: ok")
           PY
 
-  # Not a required check: it depends on github.com/ogulcancelik/herdr being reachable.
+  # Not a required check: it depends on github.com/herdrdev/herdr being reachable.
   herdr-citations:
     runs-on: ubuntu-latest
     timeout-minutes: 5

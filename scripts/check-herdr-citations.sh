@@ -10,7 +10,7 @@
 # The herdr release docs/herdr.md describes. Bump both together, then rerun this script.
 HERDR_VERSION=v0.9.5
 HERDR_COMMIT=2ecf19a92fc3a7fff75b6ce3655ef04f4625ec01
-HERDR_REPO=https://github.com/ogulcancelik/herdr.git
+HERDR_REPO=https://github.com/herdrdev/herdr.git
 
 dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 doc="${1:-$dir/../docs/herdr.md}"
