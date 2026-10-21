@@ -43,45 +43,65 @@ setup() {
   [ "$output" = "" ]
 }
 
+@test "battery: --text swaps the icon for a word" {
+  run render_batt --text < "$FIXTURES/pmset-charging.txt"
+  [ "$output" = "BAT 54% 1:45 ⚡" ]
+}
+
 @test "cpu: busy percent comes from the second top sample" {
   run render_cpu < "$FIXTURES/top.txt"
   [ "$status" -eq 0 ]
-  [ "$output" = "󰻠 13% ▂" ]
+  [ "$output" = "󰻠 13%" ]
 }
 
-@test "cpu: the sparkline shows the last 8 samples, oldest first" {
+@test "cpu: --graph adds a sparkline of the last 4 samples, oldest first" {
   mkdir -p "$MSB_STATE_DIR"
   printf '%s\n' 100 0 25 50 75 100 90 60 40 > "$MSB_STATE_DIR/cpu.history"
-  run render_cpu < "$FIXTURES/top.txt"
-  [ "$output" = "󰻠 13% ▃▅▇██▅▄▂" ]
+  run render_cpu --graph < "$FIXTURES/top.txt"
+  [ "$output" = "󰻠 13% █▅▄▂" ]
+}
+
+@test "cpu: --text swaps the icon for a word" {
+  run render_cpu --text < "$FIXTURES/top.txt"
+  [ "$output" = "CPU 13%" ]
 }
 
 # 24 GiB Mac. Used = app (anonymous - purgeable) + wired + compressed, like Activity Monitor:
 # (501000 - 8187 + 185983 + 593800) pages * 16384 B = 19.4 GiB, 81% of RAM.
-@test "mem: shows used memory like Activity Monitor, scaled to total RAM" {
+@test "mem: shows used memory like Activity Monitor" {
   run render_mem 25769803776 < "$FIXTURES/vm_stat.txt"
   [ "$status" -eq 0 ]
-  [ "$output" = "󰍛 19 GB ▇" ]
+  [ "$output" = "󰍛 19G" ]
+}
+
+@test "mem: --graph scales the sparkline to total RAM, --text swaps the icon for a word" {
+  run render_mem 25769803776 --text --graph < "$FIXTURES/vm_stat.txt"
+  [ "$output" = "MEM 19G ▇" ]
 }
 
 # en0 fixture: 7280 B in and 4357 B out between the two samples.
 @test "net: shows download and upload per second from two netstat samples 1 s apart" {
   run render_net < "$FIXTURES/netstat-en0.txt"
   [ "$status" -eq 0 ]
-  [ "$output" = "↓7 kB/s ↑4 kB/s ▆" ]
+  [ "$output" = "↓7k ↑4k" ]
 }
 
 # utun fixture has no link address column: 2097152 B in, 102400 B out.
-@test "net: switches to MB/s from 1024 kB/s and reads interfaces without a link address" {
+@test "net: switches to M from 1024k and reads interfaces without a link address" {
   run render_net < "$FIXTURES/netstat-utun.txt"
-  [ "$output" = "↓2.0 MB/s ↑100 kB/s █" ]
+  [ "$output" = "↓2.0M ↑100k" ]
 }
 
-@test "net: the download sparkline scales to the busiest recent sample" {
+@test "net: --graph scales the download sparkline to the busiest recent sample" {
   mkdir -p "$MSB_STATE_DIR"
   printf '%s\n' 0 20480 10240 > "$MSB_STATE_DIR/net.history"
-  run render_net < "$FIXTURES/netstat-en0.txt"
-  [ "$output" = "↓7 kB/s ↑4 kB/s ▁█▅▃" ]
+  run render_net --graph < "$FIXTURES/netstat-en0.txt"
+  [ "$output" = "↓7k ↑4k ▁█▅▃" ]
+}
+
+@test "net: --text adds a word in front of the arrows" {
+  run render_net --text < "$FIXTURES/netstat-en0.txt"
+  [ "$output" = "NET ↓7k ↑4k" ]
 }
 
 @test "cpu: no top output hides the segment and keeps the history clean" {

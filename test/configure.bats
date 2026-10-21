@@ -1,6 +1,7 @@
 #!/usr/bin/env bats
 
 SCRIPT=/Users/me/.local/state/herdr/plugins/tomajask.macos-statusbar/bin/statusbar.sh
+SEP='tab_bar_right_separator = " │ " # macos-statusbar:separator'
 
 setup() {
   source "$BATS_TEST_DIRNAME/../bin/configure.sh"
@@ -18,37 +19,37 @@ EOF
 @test "add: an empty config gets a [ui] table with all four segments" {
   run config_add "$SCRIPT" < /dev/null
   [ "$status" -eq 0 ]
-  [ "$output" = "$(printf '[ui]\ntab_bar_right = [\n%s\n]' "$(entries)")" ]
+  [ "$output" = "$(printf '[ui]\n'"$SEP"'\ntab_bar_right = [\n%s\n]' "$(entries)")" ]
 }
 
 @test "add: a config with only [ui.*] sub-tables gets [ui] right before the first one" {
   input=$(printf 'onboarding = false\n\n[experimental]\npane_history = true\n\n[ui.toast]\ndelivery = "off"')
   run config_add "$SCRIPT" <<< "$input"
   [ "$status" -eq 0 ]
-  [ "$output" = "$(printf 'onboarding = false\n\n[experimental]\npane_history = true\n\n[ui]\ntab_bar_right = [\n%s\n]\n\n[ui.toast]\ndelivery = "off"' "$(entries)")" ]
+  [ "$output" = "$(printf 'onboarding = false\n\n[experimental]\npane_history = true\n\n[ui]\n'"$SEP"'\ntab_bar_right = [\n%s\n]\n\n[ui.toast]\ndelivery = "off"' "$(entries)")" ]
 }
 
 @test "add: a config without any [ui] table gets one appended" {
   run config_add "$SCRIPT" <<< 'onboarding = false'
-  [ "$output" = "$(printf 'onboarding = false\n\n[ui]\ntab_bar_right = [\n%s\n]' "$(entries)")" ]
+  [ "$output" = "$(printf 'onboarding = false\n\n[ui]\n'"$SEP"'\ntab_bar_right = [\n%s\n]' "$(entries)")" ]
 }
 
 @test "add: an existing [ui] table without tab_bar_right gets the array under its header" {
   input=$(printf '[ui]\naccent = "cyan"\n\n[keys]\nprefix = "ctrl+b"')
   run config_add "$SCRIPT" <<< "$input"
-  [ "$output" = "$(printf '[ui]\ntab_bar_right = [\n%s\n]\naccent = "cyan"\n\n[keys]\nprefix = "ctrl+b"' "$(entries)")" ]
+  [ "$output" = "$(printf '[ui]\n'"$SEP"'\ntab_bar_right = [\n%s\n]\naccent = "cyan"\n\n[keys]\nprefix = "ctrl+b"' "$(entries)")" ]
 }
 
 @test "add: an existing multi-line tab_bar_right keeps the user's entries after ours" {
   input=$(printf '[ui]\ntab_bar_right = [ # mine\n  { type = "datetime" }\n]')
   run config_add "$SCRIPT" <<< "$input"
-  [ "$output" = "$(printf '[ui]\ntab_bar_right = [ # mine\n%s\n  { type = "datetime" }\n]' "$(entries)")" ]
+  [ "$output" = "$(printf '[ui]\n'"$SEP"'\ntab_bar_right = [ # mine\n%s\n  { type = "datetime" }\n]' "$(entries)")" ]
 }
 
 @test "add: an empty one-line tab_bar_right becomes a multi-line array" {
   input=$(printf '[ui]\ntab_bar_right = []\naccent = "cyan"')
   run config_add "$SCRIPT" <<< "$input"
-  [ "$output" = "$(printf '[ui]\ntab_bar_right = [\n%s\n]\naccent = "cyan"' "$(entries)")" ]
+  [ "$output" = "$(printf '[ui]\n'"$SEP"'\ntab_bar_right = [\n%s\n]\naccent = "cyan"' "$(entries)")" ]
 }
 
 @test "add: running it again changes nothing" {
@@ -79,7 +80,7 @@ EOF
 
 @test "add: ignores a commented-out tab_bar_right" {
   run config_add "$SCRIPT" <<< "$(printf '[ui]\n# tab_bar_right = []')"
-  [ "$output" = "$(printf '[ui]\ntab_bar_right = [\n%s\n]\n# tab_bar_right = []' "$(entries)")" ]
+  [ "$output" = "$(printf '[ui]\n'"$SEP"'\ntab_bar_right = [\n%s\n]\n# tab_bar_right = []' "$(entries)")" ]
 }
 
 @test "remove: takes out exactly the lines add put in an existing array" {
@@ -98,4 +99,16 @@ EOF
   run config_add "$SCRIPT" <<< 'ui.tab_bar_right = []'
   [ "$status" -eq 3 ]
   [[ "$output" == *"$(entries | sed -n 2p)"* ]]
+}
+
+@test "add: a separator the user already set is left alone" {
+  input=$(printf '[ui]\ntab_bar_right_separator = "  "')
+  run config_add "$SCRIPT" <<< "$input"
+  [ "$output" = "$(printf '[ui]\ntab_bar_right = [\n%s\n]\ntab_bar_right_separator = "  "' "$(entries)")" ]
+}
+
+@test "add: a config set up before separators existed gets only the separator" {
+  old=$(config_add "$SCRIPT" < /dev/null | grep -v 'macos-statusbar:separator')
+  run config_add "$SCRIPT" <<< "$old"
+  [ "$output" = "$(config_add "$SCRIPT" < /dev/null)" ]
 }

@@ -23,8 +23,11 @@ segment_entries() {
   done
 }
 
+SEPARATOR_LINE='tab_bar_right_separator = " │ " # macos-statusbar:separator'
+
 # stdin: config.toml, stdout: config.toml with the segments that are not there yet
-# at the start of ui.tab_bar_right. Exits 3 on a layout it cannot edit safely.
+# at the start of ui.tab_bar_right, and our separator unless one is set.
+# Exits 3 on a layout it cannot edit safely.
 config_add() {
   local script="$1" input missing="" segment
   input=$(cat)
@@ -34,24 +37,22 @@ config_add() {
       *) missing="$missing $segment" ;;
     esac
   done
-  if [ -z "$missing" ]; then
-    printf '%s\n' "$input"
-    return
-  fi
 
   # shellcheck disable=SC2086 # $missing is a list of segment names
-  printf '%s\n' "$input" | MSB_ENTRIES="$(segment_entries "$script" $missing)" awk '
+  printf '%s\n' "$input" |
+    MSB_ENTRIES="$(segment_entries "$script" $missing)" MSB_SEPARATOR="$SEPARATOR_LINE" awk '
     BEGIN { entries = ENVIRON["MSB_ENTRIES"] }
     { line[NR] = $0 }
     /^[ \t]*\[/ { in_ui = 0; seen_table = 1 }
     !seen_table && /^[ \t]*ui[ \t]*[.=]/ {
       refuse = "ui settings are written as dotted keys or an inline table"
     }
-    /^[ \t]*\[ui\][ \t]*(#.*)?$/ { ui = NR; in_ui = 1; next }
-    /^[ \t]*\[ui\.[^]]*\][ \t]*(#.*)?$/ && !first_sub { first_sub = NR }
+    /^[ \t]*\[ui\][ \t]*(#.*)?$/ { ui_line = NR; in_ui = 1; next }
+    /^[ \t]*\[ui\.[^]]*\][ \t]*(#.*)?$/ && !first_subtable_line { first_subtable_line = NR }
+    in_ui && /^[ \t]*tab_bar_right_separator[ \t]*=/ { has_separator = 1 }
     in_ui && /^[ \t]*tab_bar_right[ \t]*=/ {
-      if ($0 ~ /=[ \t]*\[[ \t]*(#.*)?$/) array_open = NR
-      else if ($0 ~ /=[ \t]*\[[ \t]*\][ \t]*(#.*)?$/) array_empty = NR
+      if ($0 ~ /=[ \t]*\[[ \t]*(#.*)?$/) array_open_line = NR
+      else if ($0 ~ /=[ \t]*\[[ \t]*\][ \t]*(#.*)?$/) array_empty_line = NR
       else refuse = "tab_bar_right is not a multi-line array"
     }
     END {
@@ -61,18 +62,20 @@ config_add() {
         exit 3
       }
       if (NR == 1 && line[1] == "") NR = 0
-      new_array = "tab_bar_right = [\n" entries "\n]"
-      new_table = "[ui]\n" new_array
+      separator = has_separator ? "" : ENVIRON["MSB_SEPARATOR"] "\n"
+      new_array = entries == "" ? "" : "tab_bar_right = [\n" entries "\n]"
+      new_table = "[ui]\n" separator new_array
       if (NR == 0) { print new_table; exit }
 
       for (i = 1; i <= NR; i++) {
-        if (!ui && i == first_sub) print new_table "\n"
-        if (i == array_empty) { print new_array; continue }
+        if (!ui_line && i == first_subtable_line) print new_table "\n"
+        if (i == array_empty_line && new_array != "") { print new_array; continue }
         print line[i]
-        if (i == array_open) print entries
-        if (i == ui && !array_open && !array_empty) print new_array
+        if (i == ui_line && separator != "") printf "%s", separator
+        if (i == array_open_line && entries != "") print entries
+        if (i == ui_line && !array_open_line && !array_empty_line && new_array != "") print new_array
       }
-      if (!ui && !first_sub) print "\n" new_table
+      if (!ui_line && !first_subtable_line) print "\n" new_table
     }'
 }
 
