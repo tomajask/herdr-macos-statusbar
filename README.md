@@ -3,8 +3,10 @@
 A [herdr](https://herdr.dev) plugin that puts an iTerm2-style status bar in the tab bar on macOS:
 
 ```
-󰁾 54% 1:45 ⚡ │ 󰻠 13% │ 󰍛 19G │ ↓121k ↑76k
+BAT 54% 1:45 ⚡ │ CPU 13% │ MEM 19G │ ↓121k ↑76k
 ```
+
+By default, the terminal shows Nerd Font icons where this preview has `BAT`, `CPU` and `MEM`. They aren't shown here because browsers have no Nerd Font. If you prefer the words, use `--text`.
 
 | Segment | Shows | Refresh |
 |---|---|---|
