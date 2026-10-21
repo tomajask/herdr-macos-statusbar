@@ -1,0 +1,6 @@
+Name       Mtu   Network       Address            Ipkts Ierrs     Ibytes    Opkts Oerrs     Obytes  Coll
+utun4      1380  <Link#23>                      1000     0     500000      900     0     200000     0
+utun4      1380  10.8.0.2      10.8.0.2           1000     -     500000      900     -     200000     -
+Name       Mtu   Network       Address            Ipkts Ierrs     Ibytes    Opkts Oerrs     Obytes  Coll
+utun4      1380  <Link#23>                      3000     0    2597152     1900     0     302400     0
+utun4      1380  10.8.0.2      10.8.0.2           3000     -    2597152     1900     -     302400     -
