@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  HOMEBREW_NO_AUTO_UPDATE: 1
+
+jobs:
+  # `checks` is the required status check on main; renaming it means updating branch protection.
+  checks:
+    # macOS: the plugin targets the system /bin/bash 3.2 and BSD userland.
+    runs-on: macos-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install bats and shellcheck
+        run: brew install bats-core shellcheck
+
+      - name: Bash 3.2 parses every script
+        # Parsing only: bash 4 features such as `declare -A` fail at run time, which the tests cover.
+        run: |
+          status=0
+          for script in bin/*.sh; do /bin/bash -n "$script" || status=1; done
+          exit "$status"
+
+      - name: ShellCheck
+        run: shellcheck bin/*.sh
+
+      - name: Tests on /bin/bash 3.2
+        # Put /bin first so `#!/usr/bin/env bash` in bats resolves to the bash users have.
+        run: |
+          export PATH="/bin:/usr/bin:$(brew --prefix)/bin"
+          version=$(bash -c 'echo "$BASH_VERSION"')
+          echo "bats runs on bash $version ($(command -v bash))"
+          case "$version" in
+            3.2.*) ;;
+            *) echo "expected bash 3.2, got $version" >&2; exit 1 ;;
+          esac
+          bats test/
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Plugin manifest
+        run: |
+          python3 - <<'PY'
+          import tomllib
+          with open("herdr-plugin.toml", "rb") as f:
+              manifest = tomllib.load(f)
+          missing = {"id", "name", "version", "min_herdr_version", "platforms"} - manifest.keys()
+          assert not missing, f"herdr-plugin.toml is missing {sorted(missing)}"
+          assert manifest["platforms"] == ["macos"], manifest["platforms"]
+          print(f"{manifest['id']} {manifest['version']}: ok")
+          PY
