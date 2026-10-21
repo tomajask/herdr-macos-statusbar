@@ -23,7 +23,8 @@ segment_entries() {
   done
 }
 
-SEPARATOR_LINE='tab_bar_right_separator = " │ " # macos-statusbar:separator'
+SEPARATOR=" │ "
+SEPARATOR_LINE="tab_bar_right_separator = \"$SEPARATOR\" ${MARKER}separator"
 
 # stdin: config.toml, stdout: config.toml with the segments that are not there yet
 # at the start of ui.tab_bar_right, and our separator unless one is set.
