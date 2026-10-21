@@ -7,7 +7,7 @@ MARKER="# macos-statusbar:"
 
 segment_interval() {
   case "$1" in
-    batt) echo 30 ;;
+    batt) echo 2 ;; # pmset takes ~10 ms; keeps ⚡ in step with the charger
     mem) echo 5 ;;
     *) echo 3 ;;
   esac

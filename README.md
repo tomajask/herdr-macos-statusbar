@@ -8,7 +8,7 @@ A [herdr](https://herdr.dev) plugin that puts an iTerm2-style status bar in the 
 
 | Segment | Shows | Refresh |
 |---|---|---|
-| `batt` | charge, time to full or empty when macOS has an estimate, ⚡ while charging; hidden on Macs without a battery | 30 s |
+| `batt` | charge, time to full or empty when macOS has an estimate, ⚡ while charging; hidden on Macs without a battery | 2 s |
 | `cpu` | busy percent | 3 s |
 | `mem` | used memory in GiB, as Activity Monitor counts it (app + wired + compressed) | 5 s |
 | `net` | download and upload per second on the default-route interface, in k or M (bytes) | 3 s |

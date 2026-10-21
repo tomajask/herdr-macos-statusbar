@@ -9,7 +9,7 @@ setup() {
 
 entries() {
   cat <<EOF
-  { type = "command", command = "'$SCRIPT' batt", interval_seconds = 30, timeout_seconds = 5 }, # macos-statusbar:batt
+  { type = "command", command = "'$SCRIPT' batt", interval_seconds = 2, timeout_seconds = 5 }, # macos-statusbar:batt
   { type = "command", command = "'$SCRIPT' cpu", interval_seconds = 3, timeout_seconds = 5 }, # macos-statusbar:cpu
   { type = "command", command = "'$SCRIPT' mem", interval_seconds = 5, timeout_seconds = 5 }, # macos-statusbar:mem
   { type = "command", command = "'$SCRIPT' net", interval_seconds = 3, timeout_seconds = 5 }, # macos-statusbar:net
