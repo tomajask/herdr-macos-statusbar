@@ -128,6 +128,12 @@ render_net() {
   echo "${prefix}↓$(format_rate "$down") ↑$(format_rate "$up")$(graph "$history" "$max")"
 }
 
+# No default route: the net segment says so instead of showing rates.
+render_offline() {
+  parse_options "$@"
+  echo "$(label 󰖪 NET)offline"
+}
+
 # stdin: `pmset -g batt`. Prints nothing on a Mac without a battery.
 render_batt() {
   parse_options "$@"
@@ -168,8 +174,7 @@ main() {
       local iface
       iface=$(route -n get default 2>/dev/null | awk '/interface:/ { print $2 }')
       if [ -z "$iface" ]; then
-        parse_options "$@"
-        echo "$(label 󰖪 NET)offline"
+        render_offline "$@"
         return
       fi
       { netstat -ibn -I "$iface"; sleep 1; netstat -ibn -I "$iface"; } | render_net "$@"

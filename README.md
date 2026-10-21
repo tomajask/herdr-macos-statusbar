@@ -88,6 +88,7 @@ brew install bats-core shellcheck
 bats test/
 shellcheck bin/*.sh
 herdr plugin link .
+bin/preview.sh --graph   # the bar as herdr shows it, with its length
 ```
 
 The tests feed raw output from the macOS tools into each segment (see `test/fixtures/README.md` for which samples are real captures), and feed sample `config.toml` files into the config editor.
