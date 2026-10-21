@@ -6,44 +6,44 @@ setup() {
   export MSB_STATE_DIR="$BATS_TEST_TMPDIR/state"
 }
 
-@test "battery: charging shows level icon, percent, time to full and a bolt" {
+@test "batt: charging shows level icon, percent, time to full and a bolt" {
   run render_batt < "$FIXTURES/pmset-charging.txt"
   [ "$status" -eq 0 ]
   [ "$output" = "󰁾 54% 1:45 ⚡" ]
 }
 
-@test "battery: discharging shows time left without a bolt" {
+@test "batt: discharging shows time left without a bolt" {
   run render_batt < "$FIXTURES/pmset-discharging.txt"
   [ "$output" = "󰂁 76% 4:12" ]
 }
 
-@test "battery: no estimate hides the time" {
+@test "batt: no estimate hides the time" {
   run render_batt < "$FIXTURES/pmset-no-estimate.txt"
   [ "$output" = "󰂁 76%" ]
 }
 
-@test "battery: fully charged shows a full icon and no time or bolt" {
+@test "batt: fully charged shows a full icon and no time or bolt" {
   run render_batt < "$FIXTURES/pmset-charged.txt"
   [ "$output" = "󰁹 100%" ]
 }
 
-@test "battery: plugged in but not charging shows no bolt" {
+@test "batt: plugged in but not charging shows no bolt" {
   run render_batt < "$FIXTURES/pmset-not-charging.txt"
   [ "$output" = "󰂁 80%" ]
 }
 
-@test "battery: nearly empty shows the outline icon" {
+@test "batt: nearly empty shows the outline icon" {
   run render_batt < "$FIXTURES/pmset-low.txt"
   [ "$output" = "󰂎 3% 0:09" ]
 }
 
-@test "battery: a Mac without a battery prints nothing" {
+@test "batt: a Mac without a battery prints nothing" {
   run render_batt < "$FIXTURES/pmset-desktop.txt"
   [ "$status" -eq 0 ]
   [ "$output" = "" ]
 }
 
-@test "battery: --text swaps the icon for a word" {
+@test "batt: --text swaps the icon for a word" {
   run render_batt --text < "$FIXTURES/pmset-charging.txt"
   [ "$output" = "BAT 54% 1:45 ⚡" ]
 }
@@ -116,7 +116,7 @@ starts_with_icon() {
   perl -CSD -ne 'exit(/^[\x{E000}-\x{F8FF}\x{F0000}-\x{FFFFF}] \S/ ? 0 : 1)' <<< "$1"
 }
 
-@test "icons: battery starts with a Nerd Font icon" {
+@test "icons: batt starts with a Nerd Font icon" {
   run render_batt < "$FIXTURES/pmset-charging.txt"
   starts_with_icon "$output"
 }

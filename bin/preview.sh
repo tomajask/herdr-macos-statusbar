@@ -2,6 +2,7 @@
 # Prints the four segments joined the way herdr shows them, plus the width they take.
 # Usage: bin/preview.sh [--graph] [--text]
 # Flags apply to every segment. Takes about 2 s, because the CPU segment samples top.
+# Uses the separator configure sets; a user's own tab_bar_right_separator would differ.
 set -o pipefail
 
 dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
@@ -17,4 +18,4 @@ for segment in $SEGMENTS; do
 done
 
 echo "$bar"
-printf '%s' "$bar" | perl -CSD -ne 'printf "%d characters of the tab row; tabs get the rest\n", length'
+printf '%s' "$bar" | perl -CSD -ne 'printf "%d code points of the tab row (wide glyphs such as the bolt take 2 columns); tabs get the rest\n", length'
