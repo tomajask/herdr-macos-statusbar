@@ -116,11 +116,27 @@ starts_with_icon() {
   perl -CSD -ne 'exit(/^[\x{E000}-\x{F8FF}\x{F0000}-\x{FFFFF}] \S/ ? 0 : 1)' <<< "$1"
 }
 
-@test "icons: battery, cpu and mem start with a Nerd Font icon" {
+@test "icons: battery starts with a Nerd Font icon" {
   run render_batt < "$FIXTURES/pmset-charging.txt"
   starts_with_icon "$output"
+}
+
+@test "icons: cpu starts with a Nerd Font icon" {
   run render_cpu < "$FIXTURES/top.txt"
   starts_with_icon "$output"
+}
+
+@test "icons: mem starts with a Nerd Font icon" {
   run render_mem 25769803776 < "$FIXTURES/vm_stat.txt"
   starts_with_icon "$output"
+}
+
+@test "icons: offline starts with a Nerd Font icon" {
+  run render_offline
+  starts_with_icon "$output"
+}
+
+@test "net: no default route shows offline, --text says NET" {
+  run render_offline --text
+  [ "$output" = "NET offline" ]
 }
