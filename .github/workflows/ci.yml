@@ -25,15 +25,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Markdown has no Nerd Font glyphs
-        # GitHub renders Markdown in a browser font, where these glyphs show as empty boxes.
-        # Lines are decoded strictly, so any invalid UTF-8 fails the step;
-        # `$? = 1` sets the exit status without hiding that failure.
-        run: |
-          git ls-files -z '*.md' | xargs -0 perl -MEncode -ne '
-            my $text = Encode::decode("UTF-8", $_, Encode::FB_CROAK);
-            if ($text =~ /[\x{E000}-\x{F8FF}\x{F0000}-\x{FFFFF}]/) { print "$ARGV:$.: Nerd Font glyph\n"; $bad = 1 }
-            close ARGV if eof;
-            END { $? = 1 if $bad }'
+        run: scripts/check-markdown-glyphs.sh
 
       - name: Install bats and shellcheck
         run: brew install bats-core shellcheck
@@ -42,11 +34,11 @@ jobs:
         # Parsing only: bash 4 features such as `declare -A` fail at run time, which the tests cover.
         run: |
           status=0
-          for script in bin/*.sh; do /bin/bash -n "$script" || status=1; done
+          for script in bin/*.sh scripts/*.sh; do /bin/bash -n "$script" || status=1; done
           exit "$status"
 
       - name: ShellCheck
-        run: shellcheck bin/*.sh
+        run: shellcheck bin/*.sh scripts/*.sh
 
       - name: Tests on /bin/bash 3.2
         # Put /bin first so `#!/usr/bin/env bash` in bats resolves to the bash users have.
@@ -75,3 +67,16 @@ jobs:
           assert manifest["platforms"] == ["macos"], manifest["platforms"]
           print(f"{manifest['id']} {manifest['version']}: ok")
           PY
+
+  # Not a required check: it depends on github.com/ogulcancelik/herdr being reachable.
+  herdr-citations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Clone herdr at the version docs/herdr.md describes
+        run: git clone --quiet --depth 1 --branch v0.9.5 https://github.com/ogulcancelik/herdr.git "$RUNNER_TEMP/herdr"
+
+      - name: Citations in docs/herdr.md point at existing lines
+        run: scripts/check-herdr-citations.sh "$RUNNER_TEMP/herdr"

@@ -6,7 +6,8 @@ on:
   pull_request:
     types: [opened, edited, reopened, synchronize]
 
-permissions: {}
+permissions:
+  contents: read
 
 jobs:
   # `pr-title` is a required status check on main; renaming it means updating branch protection.
@@ -14,13 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
       - name: PR title is a Conventional Commit
         env:
           TITLE: ${{ github.event.pull_request.title }}
-        run: |
-          pattern='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9-]+\))?!?: [^[:space:]].*'
-          if [[ ! "$TITLE" =~ $pattern ]]; then
-            echo "PR title must follow https://www.conventionalcommits.org/, e.g. 'fix(net): …'. Got: $TITLE" >&2
-            exit 1
-          fi
-          echo "ok: $TITLE"
+        run: scripts/check-pr-title.sh "$TITLE"
