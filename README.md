@@ -1,6 +1,6 @@
 # herdr-macos-statusbar
 
-A [herdr](https://herdr.dev) plugin that puts an iTerm2-style status bar in the tab bar on macOS:
+A [herdr](https://herdr.dev) plugin that puts an iTerm2-style status bar in the tab bar on macOS. The same segments also work in the Herdr desktop app's status bar (see [Herdr app](#herdr-app)):
 
 ![Status bar in Ghostty: battery 66% 1:22 charging, CPU 13%, memory 20G, network ↓3k ↑2k](docs/statusbar.png)
 
@@ -23,7 +23,7 @@ Each segment is a separate entry in `config.toml`. To change how one looks, add 
 
 | Flag | Effect |
 |---|---|
-| `--graph` | Adds a sparkline of the last 4 samples. `cpu` is scaled to 0–100%, `mem` to total RAM, and `net` (download) to the busiest of those samples, with a 10 kB/s floor. It does nothing for `batt`. |
+| `--graph` | Adds a sparkline of the last 6 samples. `cpu` is scaled to 0–100%, `mem` to total RAM, and `net` (download) to the busiest of those samples, with a 10 kB/s floor. It does nothing for `batt`. |
 | `--text` | Shows `BAT`, `CPU`, `MEM`, `NET` in place of the icons. Use it if you prefer words, or if your font is missing the icons. |
 
 ```toml
@@ -31,7 +31,7 @@ Each segment is a separate entry in `config.toml`. To change how one looks, add 
 ```
 
 ```
-BAT 66% 1:22 ⚡ │ CPU 13% ▁▁▃▃ │ MEM 20G ▇▇▇▇ │ NET ↓3k ↑2k ▁▂▁▁
+BAT 66% 1:22 ⚡ │ CPU 13% ▂▁▁▃▃▂ │ MEM 20G ▇▇▇▇▇▇ │ NET ↓3k ↑2k ▁▁▂▁▁▂
 ```
 
 It uses only tools that ship with macOS (`pmset`, `top`, `vm_stat`, `netstat`, `route`) and the system `/bin/bash`, so there is nothing else to install.
@@ -65,6 +65,59 @@ tab_bar_right = [
 ```
 
 After `herdr plugin update`, the copied script is refreshed the next time the herdr server starts.
+
+## Herdr app
+
+The Herdr desktop app (`herdr-app`, tested with 0.1.12) doesn't read `config.toml`, so `configure` doesn't reach it. Its window is drawn by JavaScript mods in `~/.config/herdr-app`, and a mod can run `statusbar.sh` and show what it prints. This works because the segments are plain stdout.
+
+1. Get the script: `configure` already installed it at `~/.local/state/herdr/plugins/tomajask.macos-statusbar/bin/statusbar.sh`. Without the TUI, copy `bin/statusbar.sh` anywhere you like; it keeps its history in a `state/` folder next to its own `bin/`.
+2. Herdr's own layouts and mods are read-only, so clone the status bar and the layout that shows it:
+
+   ```sh
+   herdr-app do mod.clone '{"name":"workspace-status","as":"my-status"}'
+   herdr-app do layout.clone '{"name":"main","as":"my-main"}'
+   ```
+
+3. In `~/.config/herdr-app/layouts/my-main.json`, change the `status` block's `"mod": "workspace-status"` to `"mod": "my-status"`.
+4. In `~/.config/herdr-app/mods/my-status/main.js`, add `exec` to the `herdr` import, then poll each segment on a timer:
+
+   ```js
+   const STATUSBAR = "/Users/you/.local/state/herdr/plugins/tomajask.macos-statusbar/bin/statusbar.sh";
+   const SEGMENTS = [
+     { key: "batt", every: 2000 },
+     { key: "cpu", every: 3000, args: ["--graph"] },
+     { key: "mem", every: 5000, args: ["--graph"] },
+     { key: "net", every: 3000, args: ["--graph"] },
+   ];
+
+   // inside the class
+   init(_props, cx) {
+     this.seg = {};
+     for (const s of SEGMENTS) {
+       cx.timer.every(s.every, (cx) => this.refresh(s, cx));
+       this.refresh(s, cx);
+     }
+   }
+
+   refresh(s, cx) {
+     cx.spawn(async (cx) => {
+       const r = await exec(STATUSBAR, [s.key, ...(s.args ?? [])]).catch(() => null);
+       const text = r && r.code === 0 ? r.stdout.trim() : "";
+       if (text !== this.seg[s.key]) { this.seg[s.key] = text; cx.notify(); }
+     });
+   }
+   ```
+
+5. In `render()`, put the segments before the palette hint:
+
+   ```js
+   .children(SEGMENTS.filter((s) => this.seg[s.key])
+     .map((s) => div().id(`seg-${s.key}`).text_color(t.muted).child(this.seg[s.key])))
+   ```
+
+6. Run `herdr-app check ~/.config/herdr-app/mods/my-status`, then `herdr-app status` and look for an empty `errors` list. The app reloads the mod on save.
+
+The flags work the same as in the TUI. Clones are yours, so Herdr app updates don't change them.
 
 ## Uninstall
 
