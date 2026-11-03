@@ -54,11 +54,11 @@ setup() {
   [ "$output" = "󰻠 13%" ]
 }
 
-@test "cpu: --graph adds a sparkline of the last 4 samples, oldest first" {
+@test "cpu: --graph adds a sparkline of the last 6 samples, oldest first" {
   mkdir -p "$MSB_STATE_DIR"
   printf '%s\n' 100 0 25 50 75 100 90 60 40 > "$MSB_STATE_DIR/cpu.history"
   run render_cpu --graph < "$FIXTURES/top.txt"
-  [ "$output" = "󰻠 13% █▅▄▂" ]
+  [ "$output" = "󰻠 13% ▇██▅▄▂" ]
 }
 
 @test "cpu: --text swaps the icon for a word" {

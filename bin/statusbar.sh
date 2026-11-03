@@ -4,7 +4,7 @@
 #   --graph  add a sparkline of the last samples (cpu, mem, net)
 #   --text   show BAT/CPU/MEM/NET instead of Nerd Font icons
 
-HISTORY_LENGTH=4
+HISTORY_LENGTH=6
 NET_SPARKLINE_FLOOR=10240 # B/s; keeps a quiet link from drawing full bars
 
 # Sets GRAPH and TEXT from the segment's flags.

@@ -23,7 +23,7 @@ Each segment is a separate entry in `config.toml`. To change how one looks, add 
 
 | Flag | Effect |
 |---|---|
-| `--graph` | Adds a sparkline of the last 4 samples. `cpu` is scaled to 0–100%, `mem` to total RAM, and `net` (download) to the busiest of those samples, with a 10 kB/s floor. It does nothing for `batt`. |
+| `--graph` | Adds a sparkline of the last 6 samples. `cpu` is scaled to 0–100%, `mem` to total RAM, and `net` (download) to the busiest of those samples, with a 10 kB/s floor. It does nothing for `batt`. |
 | `--text` | Shows `BAT`, `CPU`, `MEM`, `NET` in place of the icons. Use it if you prefer words, or if your font is missing the icons. |
 
 ```toml
@@ -31,7 +31,7 @@ Each segment is a separate entry in `config.toml`. To change how one looks, add 
 ```
 
 ```
-BAT 66% 1:22 ⚡ │ CPU 13% ▁▁▃▃ │ MEM 20G ▇▇▇▇ │ NET ↓3k ↑2k ▁▂▁▁
+BAT 66% 1:22 ⚡ │ CPU 13% ▂▁▁▃▃▂ │ MEM 20G ▇▇▇▇▇▇ │ NET ↓3k ↑2k ▁▁▂▁▁▂
 ```
 
 It uses only tools that ship with macOS (`pmset`, `top`, `vm_stat`, `netstat`, `route`) and the system `/bin/bash`, so there is nothing else to install.
